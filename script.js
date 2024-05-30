@@ -1,32 +1,36 @@
-document.getElementById('check-availability').addEventListener('click', function() {
-    const date = document.getElementById('datepicker').value;
-    if (!date) {
-        alert('Por favor, seleccione una fecha.');
-        return;
-    }
-    
-    fetch('api/dummy_api.py?fecha=' + date)
-        .then(response => response.json())
-        .then(data => {
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = '';
-            
-            if (data.personal_disponible.length === 0) {
-                resultDiv.innerHTML = 'No hay personal disponible para la fecha seleccionada.';
-                return;
-            }
+$(document).ready(function() {
+    $("#fecha").datepicker();
 
-            data.personal_disponible.forEach(personal => {
-                const personalDiv = document.createElement('div');
-                personalDiv.innerHTML = `
-                    <h3>${personal.nombre}</h3>
-                    <p>Horario: ${personal.horarios.join(', ')}</p>
-                    <p>ID: ${personal.id}</p>
-                `;
-                resultDiv.appendChild(personalDiv);
-            });
-        })
-        .catch(error => {
-            console.error('Error:', error);
+    $("#buscarDisponibilidad").click(function() {
+        var fechaSeleccionada = $("#fecha").val();
+
+        $.ajax({
+            url: "https://github.com/carlosltn0203/json-/blob/main/api/dummy.js",
+            method: "GET",
+            data: { fecha: fechaSeleccionada },
+            success: function(data) {
+                mostrarDisponibilidad(data);
+            },
+            error: function() {
+                alert("Error al obtener la disponibilidad");
+            }
         });
+    });
+
+    function mostrarDisponibilidad(data) {
+        var resultadoHTML = "<h2>Disponibilidad para " + data.fecha + "</h2>";
+        resultadoHTML += "<ul>";
+
+        $.each(data.personal_disponible, function(index, empleado) {
+            resultadoHTML += "<li>";
+            resultadoHTML += "<strong>Nombre:</strong> " + empleado.nombre + "<br>";
+            resultadoHTML += "<strong>Horario:</strong> " + empleado.horarios.join(", ") + "<br>";
+            resultadoHTML += "<strong>ID:</strong> " + empleado.id;
+            resultadoHTML += "</li>";
+        });
+
+        resultadoHTML += "</ul>";
+
+        $("#resultado").html(resultadoHTML);
+    }
 });
